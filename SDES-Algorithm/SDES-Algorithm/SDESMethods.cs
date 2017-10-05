@@ -65,10 +65,7 @@ namespace SDES_Algorithm
             var result = "";
             for (int i = 0; i < valueA.Length; i++)
             {
-                if (valueA[i] == valueB[i])
-                    result += "0";
-                else
-                    result += "1";
+                result += (int.Parse(valueA[i].ToString()) ^ int.Parse(valueB[i].ToString())).ToString();
             }
             return result;
         }
@@ -102,8 +99,8 @@ namespace SDES_Algorithm
         private string[] Divide(string toDivide)
         {
             var TwoParts = new string[2];
-            TwoParts[0] = toDivide.Substring(0, toDivide.Length / 2);
-            TwoParts[1] = toDivide.Replace(TwoParts[0], "");
+            TwoParts[0] = toDivide.Substring(0, 4);
+            TwoParts[1] = toDivide.Substring(toDivide.Length / 2, 4);
             return TwoParts;
         }
 
