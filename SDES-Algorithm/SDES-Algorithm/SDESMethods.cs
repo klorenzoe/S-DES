@@ -16,6 +16,9 @@ namespace SDES_Algorithm
         private string[,] switchBox1 { get; set; }
         private string[,] switchBox2 { get; set; }
 
+        //others propieties
+        Random binaryAleatory;
+
 
         //Generate the key
         private void GetKey()
@@ -48,16 +51,32 @@ namespace SDES_Algorithm
         private string[,] GetSwitchBox()
         {
             var switchBox = new String[4, 4];
-            var aleatory = new Random();
 
             for (int y = 0; y < 4; y++)
             {
                 for (int x = 0; x < 4; x++)
                 {
-                    switchBox[x, y] = aleatory.Next(0, 1).ToString() +aleatory.Next(0, 1).ToString();
+                    switchBox[x, y] = binaryAleatory.Next(0, 2).ToString() + binaryAleatory.Next(0, 2).ToString();
                 }
             }
             return switchBox;
+        }
+
+        public SDESMethods(string originalFileName, ref string nameInFile)
+        {
+            binaryAleatory = new Random();
+            //k1 = GetKey();
+            //k2 = GetKey();
+            k1 = "10100011";
+            k2 = "00111101";
+            initialPermutation = GetInitialPermutation();
+            permutation4 = GetPermuation4();
+            expandAndPermut = GetExpandAndPermut();
+            switchBox1 = GetSwitchBox();
+            switchBox2 = GetSwitchBox();
+
+            //this parth saves the important tools for after Decrypt.
+            nameInFile = SaveToolsForDecrypt(originalFileName);
         }
 
         private string XOR(string valueA, string valueB)
@@ -137,22 +156,7 @@ namespace SDES_Algorithm
         /// </summary>
         public string Ciphertext(string eightBits)
         {
-            //k1 = GetKey();
-            //k2 = GetKey();
-            k1 = "10100011";
-            k2 = "00111101";
-            initialPermutation = GetInitialPermutation();
-            //initialPermutation = new int[] { 1, 5, 2, 0, 7, 3, 4, 6 };
-            permutation4 = GetPermuation4();
-            //permutation4 = new int[] { 0, 3, 1, 2 };
-            expandAndPermut = GetExpandAndPermut();
-            //expandAndPermut = new int[] { 3, 0, 1, 2, 1, 2, 3, 0 };
-            switchBox1 = GetSwitchBox();
-            switchBox2 = GetSwitchBox();
-            //switchBox1 = new string[4, 4] { { "01", "11", "00", "11" }, { "00", "10", "10", "01" }, { "11", "01", "01", "11" }, { "10", "00", "11", "10" } };
-            //switchBox2 = new string[4, 4] { { "00", "10", "11", "10" }, { "01", "00", "00", "01" }, { "10", "01", "01", "00" }, { "11", "11", "00", "11" } };
             //First Phase  (FIRST KEY)
-
             var result = new string[2];
             //Initial permut and divide in two parts
             result = Divide(Permutate(eightBits, initialPermutation));
@@ -167,12 +171,12 @@ namespace SDES_Algorithm
             return InversePermutate(result[1].ToString() + result[0].ToString(),initialPermutation);
         }
 
-        //Desencrypt area
+        //Decrypt area
 
-        public string Desencrypted(string eightBits)
+        public string Desencrypted(string eightBits, string NameInFile)
         {
+            GetToolsForDecrypt(NameInFile);
             var result = new string[2];
-
             //Fist phase
             result = Divide(Permutate(eightBits, initialPermutation));
             result = Encryption(k2, result);
@@ -181,6 +185,74 @@ namespace SDES_Algorithm
             result = Encryption(k1, result);
 
             return InversePermutate(result[1].ToString() + result[0].ToString(), initialPermutation);
+        }
+
+        //Files area
+
+        private string SaveToolsForDecrypt(string OriginalName)
+        {
+            var newName = OriginalName + "::" + FileController.GetNewCode();
+            FileController.DataToDecrypth(newName + "|" + ArrayValuesToString(initialPermutation) + "|" + ArrayValuesToString(expandAndPermut) + "|" + MatrixValuesToString(switchBox1) + "|" + MatrixValuesToString(switchBox2));
+            return newName;
+        }
+
+        private void GetToolsForDecrypt(string NameInFile)
+        {
+            var data = FileController.GetDataToDecrypth(NameInFile).Split('|');
+            initialPermutation = StringToIntArray(data[1]);
+            expandAndPermut = StringToIntArray(data[2]);
+            switchBox1 = StringToStringMatrix(data[3]);
+            switchBox2 = StringToStringMatrix(data[4]);
+        }
+
+        private string ArrayValuesToString(int[] values)
+        {
+            var result = "";
+            for (var i = 0; i < values.Length; i++)
+            {
+                result += values[i];
+            }
+            return result;
+        }
+
+        private string MatrixValuesToString(string[,] matrix)
+        {
+            var result = "";
+            for (var y = 0; y < 4; y++)
+            {
+                for (var x = 0; x < 4; x++)
+                {
+                    result += matrix[x, y] + " ";
+                }
+                result += ":";
+            }
+            return result;
+        }
+
+        private int[] StringToIntArray(string arrayStr)
+        {
+            var intArray = new int[arrayStr.Length];
+            for (int i = 0; i < arrayStr.Length; i++)
+            {
+                intArray[i] = int.Parse(arrayStr[i].ToString());
+            }
+            return intArray;
+        }
+
+        private string[,] StringToStringMatrix(string matrixStr)
+        {
+            var matrix = new string[4, 4];
+            var rows = matrixStr.Split(':');
+
+            for (int r = 0; r < 4; r++)
+            {
+                var columns = rows[r].Split();
+                for (int c = 0; c < 4; c++)
+                {
+                    matrix[c, r] = columns[c];
+                }
+            }
+            return matrix;
         }
     }
 }
