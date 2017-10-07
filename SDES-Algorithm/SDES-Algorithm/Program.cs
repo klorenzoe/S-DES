@@ -10,9 +10,9 @@ namespace SDES_Algorithm
     {
         static void Main(string[] args)
         {
-            string name = "";
+            string name = "", password = "Hola";
 
-            SDESMethods Encryption = new SDESMethods("SDES", ref name);
+            SDESMethods Encryption = new SDESMethods("SDES", ref name, password);
             var n = Encryption.Ciphertext("11100010");
             var d = Encryption.Desencrypted(n,name);
         }

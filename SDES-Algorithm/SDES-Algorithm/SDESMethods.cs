@@ -15,17 +15,117 @@ namespace SDES_Algorithm
         private int[] expandAndPermut { get; set; }
         private string[,] switchBox1 { get; set; }
         private string[,] switchBox2 { get; set; }
+        private int[] tenBitsKey = new int[10];
+        private int[] lastfive = new int[5];
+        private int[] firstFive = new int[5];
+        private int[] permutation8 { get; set; }
 
         //others propieties
         Random binaryAleatory;
 
 
         //Generate the key
-        private void GetKey()
+        private void GetKey(string password)
         {
-
+            Get10BitKey(password);
+            int [] permutation10 = Permutation10();
+            GetFiveBitsKey(permutation10);
+            firstFive =  LeftShift(firstFive);
+            lastfive = LeftShift(lastfive);
+            GetPermutation8();
+            int[] toPermutation8 = Merge();
+            k1 = GetPermutationValue(toPermutation8);
+            firstFive = LeftShift(LeftShift(firstFive));
+            lastfive = LeftShift(LeftShift(lastfive));
+            toPermutation8 = Merge();
+            k2 = GetPermutationValue(toPermutation8);
+            
         }
 
+        private int[] Permutation10()
+        {
+            var numbers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            var aleatory = new Random();
+            return numbers.OrderBy(x => aleatory.Next()).ToArray();
+        }
+
+        private void GetFiveBitsKey(int[] tenBitKey)
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                if (i < 5)
+                    firstFive[i] = tenBitKey[i];
+                else
+                    lastfive[i - 5] = tenBitKey[i];
+            }
+        }
+
+        private void GetPermutation8()
+        {
+            var numbers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7};
+            var aleatory = new Random();
+            permutation8 = numbers.OrderBy(x => aleatory.Next()).ToArray();
+        }
+
+        private string GetPermutationValue(int [] toPermutation)
+        {
+            int[] result = new int[8];
+            for (int i = 0; i < 8; i++)
+            {
+                result[i] = toPermutation[permutation8[i]];
+            }
+            return GetRealKeyValues(result);
+        }
+
+        private string GetRealKeyValues(int[] orden)
+        {
+            var result = "";
+            for (int i = 0; i < 8; i++)
+            {
+                result += tenBitsKey[orden[i]];
+            }
+            return result;
+        }
+
+        private void Get10BitKey(string password)
+        {
+            var aleatroy = new Random();
+            var result = "";
+            foreach (char character in password)
+                result += Convert.ToString((int)character, 2);
+
+            for (int i = 0; i < 10; i++)
+            {
+                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-15)].ToString());
+            }
+        } 
+
+        private int[] LeftShift(int[] key)
+        {
+            int temporal = key[0];
+            for (int i = 0; i < 4; i++)
+            {
+                key[i] = key[i + 1];
+            }
+            key[4] = temporal;
+            return key;
+        }
+
+        private int[] Merge()
+        {
+            var aleatroy = new Random();
+            int delete = aleatroy.Next(0, 4), j = 0;
+            int[] key = new int[8];
+            for (int i = 0; i < 5; i++)
+            {
+                if (i != delete)
+                {
+                    key[j] = firstFive[i];
+                    key[j++] = lastfive[i];
+                }
+            }
+            return key;
+        }
         //Encrypt area
         private int[] GetInitialPermutation()
         {
@@ -62,13 +162,12 @@ namespace SDES_Algorithm
             return switchBox;
         }
 
-        public SDESMethods(string originalFileName, ref string nameInFile)
+        public SDESMethods(string originalFileName, ref string nameInFile, string password)
         {
             binaryAleatory = new Random();
-            //k1 = GetKey();
-            //k2 = GetKey();
-            k1 = "10100011";
-            k2 = "00111101";
+            GetKey(password);
+            //k1 = "10010111";
+            //k2 = "01010010";
             initialPermutation = GetInitialPermutation();
             permutation4 = GetPermuation4();
             expandAndPermut = GetExpandAndPermut();
