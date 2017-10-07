@@ -15,6 +15,7 @@ namespace SDES_Algorithm
             string[] entrada = Console.ReadLine().Split(' ');
             int current = CaracterValido(0, entrada);
 
+
             switch (entrada[current])
             {
                 case "-c":
