@@ -8,17 +8,20 @@ namespace SDES_Algorithm
 {
     class SDESMethods
     {
+        //for keys
         private string k1 { get; set; }
         private string k2 { get; set; }
+        private int[] tenBitsKey = new int[10];
+        private int[] lastfive = new int[5];
+        private int[] firstFive = new int[5];
+        private int[] permutation8 { get; set; }
+
+        //for encryption
         private int[] initialPermutation { get; set; }
         private int[] permutation4 { get; set; }
         private int[] expandAndPermut { get; set; }
         private string[,] switchBox1 { get; set; }
         private string[,] switchBox2 { get; set; }
-        private int[] tenBitsKey = new int[10];
-        private int[] lastfive = new int[5];
-        private int[] firstFive = new int[5];
-        private int[] permutation8 { get; set; }
 
         //others propieties
         Random binaryAleatory;
@@ -28,12 +31,12 @@ namespace SDES_Algorithm
         private void GetKey(string password)
         {
             Get10BitKey(password);
-            int [] permutation10 = Permutation10();
+            var permutation10 = Permutation10();
             GetFiveBitsKey(permutation10);
             firstFive =  LeftShift(firstFive);
             lastfive = LeftShift(lastfive);
             GetPermutation8();
-            int[] toPermutation8 = Merge();
+            var toPermutation8 = Merge();
             k1 = GetPermutationValue(toPermutation8);
             firstFive = LeftShift(LeftShift(firstFive));
             lastfive = LeftShift(LeftShift(lastfive));
@@ -51,7 +54,7 @@ namespace SDES_Algorithm
 
         private void GetFiveBitsKey(int[] tenBitKey)
         {
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 if (i < 5)
                     firstFive[i] = tenBitKey[i];
@@ -69,8 +72,8 @@ namespace SDES_Algorithm
 
         private string GetPermutationValue(int [] toPermutation)
         {
-            int[] result = new int[8];
-            for (int i = 0; i < 8; i++)
+            var result = new int[8];
+            for (var i = 0; i < 8; i++)
             {
                 result[i] = toPermutation[permutation8[i]];
             }
@@ -80,7 +83,7 @@ namespace SDES_Algorithm
         private string GetRealKeyValues(int[] orden)
         {
             var result = "";
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
                 result += tenBitsKey[orden[i]];
             }
@@ -126,6 +129,7 @@ namespace SDES_Algorithm
             }
             return key;
         }
+
         //Encrypt area
         private int[] GetInitialPermutation()
         {
@@ -162,12 +166,12 @@ namespace SDES_Algorithm
             return switchBox;
         }
 
-        public SDESMethods(string originalFileName, ref string nameInFile, string password)
+        public SDESMethods(string originalFileName, ref string nameOnFile, string password)
         {
             binaryAleatory = new Random();
             GetKey(password);
-            //k1 = "10010111";
-            //k2 = "01010010";
+            GetKey(password);
+            GetKey(password);
             initialPermutation = GetInitialPermutation();
             permutation4 = GetPermuation4();
             expandAndPermut = GetExpandAndPermut();
@@ -175,7 +179,7 @@ namespace SDES_Algorithm
             switchBox2 = GetSwitchBox();
 
             //this parth saves the important tools for after Decrypt.
-            nameInFile = SaveToolsForDecrypt(originalFileName);
+            nameOnFile = SaveToolsForDecrypt(originalFileName);
         }
 
         private string XOR(string valueA, string valueB)
