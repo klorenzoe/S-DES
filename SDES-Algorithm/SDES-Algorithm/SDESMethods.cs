@@ -19,7 +19,7 @@ namespace SDES_Algorithm
         private int[] lastfive = new int[5];
         private int[] firstFive = new int[5];
         private int[] permutation8 { get; set; }
-
+        int[] permutation10 { get; set; }
         //others propieties
         Random binaryAleatory;
 
@@ -28,7 +28,7 @@ namespace SDES_Algorithm
         private void GetKey(string password)
         {
             Get10BitKey(password);
-            int [] permutation10 = Permutation10();
+            permutation10 = Permutation10();
             GetFiveBitsKey(permutation10);
             firstFive =  LeftShift(firstFive);
             lastfive = LeftShift(lastfive);
