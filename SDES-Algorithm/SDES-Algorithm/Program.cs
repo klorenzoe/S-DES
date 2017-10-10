@@ -11,7 +11,11 @@ namespace SDES_Algorithm
         static void Main(string[] args)
         {
             string name = "", nemeInFile = "";
-            
+        
+            //for samples.
+            //SDESMethods Encryption = new SDESMethods("SDES", ref name, "password");
+            //Encryption.Ciphertext("11111111");
+
             string[] entrada = Console.ReadLine().Split(' ');
             int current = CaracterValido(0, entrada);
 
