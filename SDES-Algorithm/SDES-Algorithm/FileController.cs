@@ -54,7 +54,7 @@ namespace SDES_Algorithm
 
                 }
             }
-            return null;
+            return "";
         }
 
         public static string GetNewCode()
@@ -93,5 +93,32 @@ namespace SDES_Algorithm
                 }
             }
         }
+
+
+        //methods for Encrypt or Decrypt a FILE
+
+        public static void Encrypted(string password, string Path)
+        {
+            var originalFileName = ""; //Este lo recuperas del archivo que hay que cifrar.
+            var nameOnFile = ""; //Esta va vacía, retorna el nombre con un código, que después me sirve para buscar sus permutaciones en mi registro
+
+            //RECUERDA SIEMPRE LOS VAR, Pablo dijo que bajaría puntos por no usar var
+            var newEncryption = new SDESMethods(originalFileName, ref nameOnFile, password);
+            //acá llamas al archivo, lees 8 a 8 bits, y se los mandas a Ciphertext.
+            //Ciphertext con los primeros 8 te dará un resultado, con los segundos 8 otro... esos los metes en otro archivo.
+        }
+
+        public static void Decrypted(string password, string Path)
+        {
+            var nameOnFile = ""; //Esta va vacía, retorna el nombre con un código, esta dentro de tu archivo a desencriptar. (porque tu la metiste allí)
+            //Tiene este formato Junito.txt-1 //si quieres saber el nombre original le das split por -
+
+            var newEncryption = new SDESMethods(nameOnFile, password); //Este constructor solo sirve para desencriptar porque se va directo a buscar la data al archivo.
+            //acá llamas al archivo, lees 8 a 8 bits, y se los mandas a Decrypted(string eightBits) 
+            //Decrypted con los primeros 8 te dará un resultado, con los segundos 8 otro... esos los metes en otro archivo. (Este es el archivo descifrado)
+
+            //Supongo que la interfaz de Andoni hay que mejorarla despues de estos métodos (:
+        }
+
     }
 }

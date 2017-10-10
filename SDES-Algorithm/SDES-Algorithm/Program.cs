@@ -13,8 +13,7 @@ namespace SDES_Algorithm
             string name = "", nemeInFile = "";
         
             //for samples.
-            //SDESMethods Encryption = new SDESMethods("SDES", ref name, "password");
-            //Encryption.Ciphertext("11111111");
+            //FileController.Encrypted("Password","");
 
             string[] entrada = Console.ReadLine().Split(' ');
             int current = CaracterValido(0, entrada);
@@ -71,7 +70,7 @@ namespace SDES_Algorithm
             else
             {
                 SDESMethods Encryption = new SDESMethods("SDES", ref name, password);
-                Encryption.Desencrypted(eightBits, nameInFile);
+                Encryption.Decrypted(eightBits);
             }
         }
     }

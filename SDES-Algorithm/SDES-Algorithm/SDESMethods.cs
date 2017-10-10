@@ -15,6 +15,9 @@ namespace SDES_Algorithm
         private int[] lastfive = new int[5];
         private int[] firstFive = new int[5];
         private int[] permutation8 { get; set; }
+        int[] permutation10 { get; set; }
+        int[] toPermut8K1 { get; set; }
+        int[] toPermut8K2 { get; set; }
 
         //for encryption
         private int[] initialPermutation { get; set; }
@@ -22,14 +25,6 @@ namespace SDES_Algorithm
         private int[] expandAndPermut { get; set; }
         private string[,] switchBox1 { get; set; }
         private string[,] switchBox2 { get; set; }
-
-        private int[] tenBitsKey = new int[10];
-        private int[] lastfive = new int[5];
-        private int[] firstFive = new int[5];
-        private int[] permutation8 { get; set; }
-        int[] permutation10 { get; set; }
-        int[] toPermutation8K1 { get; set; }
-        int[] toPermutation8K2 { get; set; }
 
 
         //others propieties
@@ -48,13 +43,13 @@ namespace SDES_Algorithm
             lastfive = LeftShift(lastfive);
             GetPermutation8();
 
-            toPermutation8K1 = Merge();
-            k1 = GetPermutationValue(toPermutation8K1);
+            toPermut8K1 = Merge();
+            k1 = GetPermutationValue(toPermut8K1);
 
             firstFive = LeftShift(LeftShift(firstFive));
             lastfive = LeftShift(LeftShift(lastfive));
-            toPermutation8K2 = Merge();
-            k2 = GetPermutationValue(toPermutation8K1);
+            toPermut8K2 = Merge();
+            k2 = GetPermutationValue(toPermut8K1);
             
         }
 
@@ -183,8 +178,6 @@ namespace SDES_Algorithm
         {
             binaryAleatory = new Random();
             GetKey(password);
-            GetKey(password);
-            GetKey(password);
             initialPermutation = GetInitialPermutation();
             permutation4 = GetPermuation4();
             expandAndPermut = GetExpandAndPermut();
@@ -193,6 +186,11 @@ namespace SDES_Algorithm
 
             //this parth saves the important tools for after Decrypt.
             nameOnFile = SaveToolsForDecrypt(originalFileName);
+        }
+
+        public SDESMethods(string nameOnFile, string password)
+        {
+            GetToolsForDecrypt(nameOnFile, password);
         }
 
         private string XOR(string valueA, string valueB)
@@ -289,9 +287,9 @@ namespace SDES_Algorithm
 
         //Decrypt area
 
-        public string Desencrypted(string eightBits, string NameInFile)
+        public string Decrypted(string eightBits)
         {
-            GetToolsForDecrypt(NameInFile);
+            //GetToolsForDecrypt(NameInFile, password);
             var result = new string[2];
             //Fist phase
             result = Divide(Permutate(eightBits, initialPermutation));
@@ -308,17 +306,29 @@ namespace SDES_Algorithm
         private string SaveToolsForDecrypt(string OriginalName)
         {
             var newName = OriginalName + "::" + FileController.GetNewCode();
-            FileController.DataToDecrypth(newName + "|" + ArrayValuesToString(initialPermutation) + "|" + ArrayValuesToString(expandAndPermut) + "|" + MatrixValuesToString(switchBox1) + "|" + MatrixValuesToString(switchBox2));
+            FileController.DataToDecrypth(newName + "|" + ArrayValuesToString(initialPermutation) + "|" + ArrayValuesToString(expandAndPermut) + "|" + MatrixValuesToString(switchBox1) + "|" + MatrixValuesToString(switchBox2)+"|"+ArrayValuesToString(permutation10)+"|"+ArrayValuesToString(toPermut8K1)+"|"+ArrayValuesToString(toPermut8K2));
             return newName;
         }
 
-        private void GetToolsForDecrypt(string NameInFile)
+        public bool GetToolsForDecrypt(string NameOnFile, string password)
         {
-            var data = FileController.GetDataToDecrypth(NameInFile).Split('|');
-            initialPermutation = StringToIntArray(data[1]);
-            expandAndPermut = StringToIntArray(data[2]);
-            switchBox1 = StringToStringMatrix(data[3]);
-            switchBox2 = StringToStringMatrix(data[4]);
+            try
+            {
+                var data = FileController.GetDataToDecrypth(NameOnFile).Split('|');
+                initialPermutation = StringToIntArray(data[1]);
+                expandAndPermut = StringToIntArray(data[2]);
+                switchBox1 = StringToStringMatrix(data[3]);
+                switchBox2 = StringToStringMatrix(data[4]);
+                permutation10 = StringToIntArray(data[5]);
+                toPermut8K1 = StringToIntArray(data[6]);
+                toPermut8K2 = StringToIntArray(data[7]);
+                GetKey(password);
+                return true;
+            }catch(Exception e)
+            {
+                return false;
+            }
+            
         }
 
         private string ArrayValuesToString(int[] values)
