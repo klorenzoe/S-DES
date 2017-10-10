@@ -23,6 +23,15 @@ namespace SDES_Algorithm
         private string[,] switchBox1 { get; set; }
         private string[,] switchBox2 { get; set; }
 
+        private int[] tenBitsKey = new int[10];
+        private int[] lastfive = new int[5];
+        private int[] firstFive = new int[5];
+        private int[] permutation8 { get; set; }
+        int[] permutation10 { get; set; }
+        int[] toPermutation8K1 { get; set; }
+        int[] toPermutation8K2 { get; set; }
+
+
         //others propieties
         Random binaryAleatory;
 
@@ -31,17 +40,21 @@ namespace SDES_Algorithm
         private void GetKey(string password)
         {
             Get10BitKey(password);
-            var permutation10 = Permutation10();
+
+            permutation10 = Permutation10();
+
             GetFiveBitsKey(permutation10);
             firstFive =  LeftShift(firstFive);
             lastfive = LeftShift(lastfive);
             GetPermutation8();
-            var toPermutation8 = Merge();
-            k1 = GetPermutationValue(toPermutation8);
+
+            toPermutation8K1 = Merge();
+            k1 = GetPermutationValue(toPermutation8K1);
+
             firstFive = LeftShift(LeftShift(firstFive));
             lastfive = LeftShift(LeftShift(lastfive));
-            toPermutation8 = Merge();
-            k2 = GetPermutationValue(toPermutation8);
+            toPermutation8K2 = Merge();
+            k2 = GetPermutationValue(toPermutation8K1);
             
         }
 
@@ -99,7 +112,7 @@ namespace SDES_Algorithm
 
             for (int i = 0; i < 10; i++)
             {
-                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-15)].ToString());
+                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-5)].ToString());
             }
         } 
 
