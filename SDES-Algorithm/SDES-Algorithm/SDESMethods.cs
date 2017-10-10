@@ -22,6 +22,7 @@ namespace SDES_Algorithm
         int[] permutation10 { get; set; }
         int[] toPermutation8K1 { get; set; }
         int[] toPermutation8K2 { get; set; }
+
         //others propieties
         Random binaryAleatory;
 
@@ -40,7 +41,7 @@ namespace SDES_Algorithm
             firstFive = LeftShift(LeftShift(firstFive));
             lastfive = LeftShift(LeftShift(lastfive));
             toPermutation8K2 = Merge();
-            k2 = GetPermutationValue(toPermutation8K2);
+            k2 = GetPermutationValue(toPermutation8K1);
             
         }
 
@@ -98,7 +99,7 @@ namespace SDES_Algorithm
 
             for (int i = 0; i < 10; i++)
             {
-                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-15)].ToString());
+                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-5)].ToString());
             }
         } 
 

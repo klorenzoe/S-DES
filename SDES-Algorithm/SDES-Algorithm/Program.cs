@@ -25,7 +25,7 @@ namespace SDES_Algorithm
                     Decrypt(entrada, current, name, nemeInFile);
                     break;
                 case "--ayuda":
-                    Console.WriteLine("Encriptar -c <palabra clave>\nDscomprimir-d\nRuta de archivo -f\nAyuda --ayuda");
+                    Console.WriteLine("Encriptar -c <palabra clave>\nDesenciptar <palabra clave>-d\nRuta de archivo -f\nAyuda --ayuda");
                     break;
                 default:
                     Console.WriteLine("Comando no válido.\nEscriba --ayuda para obtener ayuda");
@@ -46,13 +46,13 @@ namespace SDES_Algorithm
             string password;
             var eightBits = "";
             current = CaracterValido(current++, entrada);
-            password = entrada[current];
+            password = entrada[current].Trim();
             if (password == null)
                 Console.WriteLine("Sintaxis no válida\nEscriba --ayuda para obtener ayuda");
             else
             {
                 SDESMethods Encryption = new SDESMethods("SDES", ref name, password);
-                Encryption.Ciphertext(eightBits);
+                //Encryption.Ciphertext(eightBits);
             }
         }
 
@@ -61,7 +61,7 @@ namespace SDES_Algorithm
             string password;
             var eightBits = "";
             current = CaracterValido(current++, entrada);
-            password = entrada[current];
+            password = entrada[current].Trim();
             if(password == null)
                 Console.WriteLine("Sintaxis no válida\nEscriba --ayuda para obtener ayuda");
             else
