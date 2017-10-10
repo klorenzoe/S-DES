@@ -20,6 +20,8 @@ namespace SDES_Algorithm
         private int[] firstFive = new int[5];
         private int[] permutation8 { get; set; }
         int[] permutation10 { get; set; }
+        int[] toPermutation8K1 { get; set; }
+        int[] toPermutation8K2 { get; set; }
         //others propieties
         Random binaryAleatory;
 
@@ -33,12 +35,12 @@ namespace SDES_Algorithm
             firstFive =  LeftShift(firstFive);
             lastfive = LeftShift(lastfive);
             GetPermutation8();
-            int[] toPermutation8 = Merge();
-            k1 = GetPermutationValue(toPermutation8);
+            toPermutation8K1 = Merge();
+            k1 = GetPermutationValue(toPermutation8K1);
             firstFive = LeftShift(LeftShift(firstFive));
             lastfive = LeftShift(LeftShift(lastfive));
-            toPermutation8 = Merge();
-            k2 = GetPermutationValue(toPermutation8);
+            toPermutation8K2 = Merge();
+            k2 = GetPermutationValue(toPermutation8K2);
             
         }
 
