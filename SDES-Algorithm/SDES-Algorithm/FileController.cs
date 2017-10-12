@@ -165,7 +165,7 @@ namespace SDES_Algorithm
             }
             catch (Exception e)
             {
-                Console.WriteLine("Dicho archivo no esta cifrado con SDES");
+                Console.WriteLine("No se tienen registros que dicho archivo esta cifrado con SDES");
             }
         }
 
@@ -185,6 +185,7 @@ namespace SDES_Algorithm
             var Names = chain.Split(new[] { "||" }, StringSplitOptions.None)[0];
             OriginalName = Names.Split(new[] { "::" }, StringSplitOptions.None)[1];
             NameOnFile = OriginalName+"::"+Names.Split(new[] { "::" }, StringSplitOptions.None)[2];
+            OriginalName = "Descifrado_"+OriginalName;
 
         }
 

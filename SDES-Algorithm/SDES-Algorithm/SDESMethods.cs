@@ -43,24 +43,15 @@ namespace SDES_Algorithm
         {
             var bytes = "";
             password = Permutate(password, permutationInitialKey);
-            foreach (char ch in password)
-            {
-                bytes += Convert.ToString((int)ch, 2);
-            }
 
-            if (bytes.Length < 10)
+            while(bytes.Length < 10)
             {
-                var complement = bytes;
-                for (int i = bytes.Length; i < 10; i++)
+                foreach (char ch in password)
                 {
-                    complement += "0";
+                    bytes += Convert.ToString((int)ch, 2)[3];
                 }
-                return complement;
             }
-            else
-            {
-                return bytes.Substring(0, 10);
-            }
+            return bytes.Substring(0, 10);
         }
 
         private string GetFiveBitsKey(string tenBitKey, int firstOrSecond)
