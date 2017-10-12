@@ -22,6 +22,7 @@ namespace SDES_Algorithm
             {
                 using (var writer = new StreamWriter(binnacle))
                 {
+                    writer.BaseStream.Position = writer.BaseStream.Length;
                     writer.WriteLine(data);
                 }
             }
@@ -99,25 +100,92 @@ namespace SDES_Algorithm
 
         public static void Encrypted(string password, string Path)
         {
-            var originalFileName = ""; //Este lo recuperas del archivo que hay que cifrar.
-            var nameOnFile = ""; //Esta va vacía, retorna el nombre con un código, que después me sirve para buscar sus permutaciones en mi registro
+            var nameOnFile = "";
 
-            //RECUERDA SIEMPRE LOS VAR, Pablo dijo que bajaría puntos por no usar var
-            var newEncryption = new SDESMethods(originalFileName, ref nameOnFile, password);
-            //acá llamas al archivo, lees 8 a 8 bits, y se los mandas a Ciphertext.
-            //Ciphertext con los primeros 8 te dará un resultado, con los segundos 8 otro... esos los metes en otro archivo.
+            var newEncryption = new SDESMethods(Path.Split('\\')[Path.Split('\\').Length-1], ref nameOnFile, password);
+
+            using (var file = new FileStream(Path, FileMode.Open))
+            {
+                using (var text = new BinaryReader(file))
+                {
+                    var name = Path.Split('\\');
+                    name[name.Length - 1] = name[name.Length - 1].Split('.')[0] + ".cif";
+                    var salida = string.Join("\\", name);
+                    var eightBits="";
+
+                    using (var fileToWrite = new FileStream(salida, FileMode.Create))
+                    {
+                        using (var toWrite = new BinaryWriter(fileToWrite, Encoding.ASCII))
+                        {
+                            toWrite.Write("::"+nameOnFile + "||");
+                            for (int i = 0; i < text.BaseStream.Length; i++)
+                            {
+                                eightBits = Convert.ToString(text.ReadByte(), 2).PadLeft(8, '0');
+                                toWrite.Write(Convert.ToByte(newEncryption.Ciphertext(eightBits), 2));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public static void Decrypted(string password, string Path)
         {
-            var nameOnFile = ""; //Esta va vacía, retorna el nombre con un código, esta dentro de tu archivo a desencriptar. (porque tu la metiste allí)
-            //Tiene este formato Junito.txt-1 //si quieres saber el nombre original le das split por -
+            try
+            {
+                var OriginalName = "";
+                var NameOnFile = "";
+                var eightBits = "";
+                using (var fileForRead = new FileStream(Path, FileMode.Open))
+                {
+                    using(var text = new BinaryReader(fileForRead))
+                    {
+                        ReadNames(text, ref OriginalName, ref NameOnFile);
+                        var name = Path.Split('\\');
+                        name[name.Length - 1] = OriginalName;
+                        var salida = string.Join("\\", name);
 
-            var newEncryption = new SDESMethods(nameOnFile, password); //Este constructor solo sirve para desencriptar porque se va directo a buscar la data al archivo.
-            //acá llamas al archivo, lees 8 a 8 bits, y se los mandas a Decrypted(string eightBits) 
-            //Decrypted con los primeros 8 te dará un resultado, con los segundos 8 otro... esos los metes en otro archivo. (Este es el archivo descifrado)
+                        var newDecryption = new SDESMethods(NameOnFile, password);
+                        using (var fileForWrite = new FileStream(salida, FileMode.Create))
+                        {
+                            using (var toWrite = new BinaryWriter(fileForWrite, Encoding.GetEncoding("iso-8859-1")))
+                            {
+                                text.BaseStream.Seek(NameOnFile.Length+5, SeekOrigin.Begin);
+                                for (int i = NameOnFile.Length+5; i < text.BaseStream.Length; i++)
+                                {
+                                    eightBits = Convert.ToString(text.ReadByte(), 2).PadLeft(8, '0');
+                                    toWrite.Write(Convert.ToByte(newDecryption.Decrypted(eightBits), 2));
+                                }
+                            }
+                        }
+                    }
+                    
 
-            //Supongo que la interfaz de Andoni hay que mejorarla despues de estos métodos (:
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Dicho archivo no esta cifrado con SDES");
+            }
+        }
+
+        private static void ReadNames(BinaryReader text, ref string OriginalName, ref string NameOnFile)
+        {
+            var chain = "";
+            for (int i = 0; i < text.BaseStream.Length; i++)
+            {
+                var c = text.ReadByte();
+                chain += Convert.ToChar(c).ToString();
+
+                if (chain.Contains("||"))
+                {
+                    break;
+                }
+            }
+            var Names = chain.Split(new[] { "||" }, StringSplitOptions.None)[0];
+            OriginalName = Names.Split(new[] { "::" }, StringSplitOptions.None)[1];
+            NameOnFile = OriginalName+"::"+Names.Split(new[] { "::" }, StringSplitOptions.None)[2];
+
         }
 
     }

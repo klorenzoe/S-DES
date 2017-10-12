@@ -11,13 +11,9 @@ namespace SDES_Algorithm
         //for keys
         private string k1 { get; set; }
         private string k2 { get; set; }
-        private int[] tenBitsKey = new int[10];
-        private int[] lastfive = new int[5];
-        private int[] firstFive = new int[5];
+        private int[] permutation10 { get; set; }
         private int[] permutation8 { get; set; }
-        int[] permutation10 { get; set; }
-        int[] toPermut8K1 { get; set; }
-        int[] toPermut8K2 { get; set; }
+        private int[] permutationInitialKey { get; set; }
 
         //for encryption
         private int[] initialPermutation { get; set; }
@@ -28,129 +24,66 @@ namespace SDES_Algorithm
 
 
         //others propieties
-        Random binaryAleatory;
+        Random binaryAleatory { get; set; }
+        Random Order { get; set; }
 
 
         //Generate the key
-        private void GetKey(string password)
+        private void GetKeys(string password)
         {
-            Get10BitKey(password);
-
-            permutation10 = Permutation10();
-
-            GetFiveBitsKey(permutation10);
-            firstFive =  LeftShift(firstFive);
-            lastfive = LeftShift(lastfive);
-            GetPermutation8();
-
-            toPermut8K1 = Merge();
-            k1 = GetPermutationValue(toPermut8K1);
-
-            firstFive = LeftShift(LeftShift(firstFive));
-            lastfive = LeftShift(LeftShift(lastfive));
-            toPermut8K2 = Merge();
-            k2 = GetPermutationValue(toPermut8K1);
-            
+            var tenBits = GetThenBits(password);
+            tenBits = Permutate(tenBits, permutation10);
+            var FirstFive = LeftShift(GetFiveBitsKey(tenBits, 1));
+            var SecondFive = LeftShift(GetFiveBitsKey(tenBits, 2));
+            k1 = Permutate(FirstFive + SecondFive , permutation8);
+            k2 = Permutate(LeftShift(FirstFive) + LeftShift(SecondFive), permutation8);
         }
 
-        private int[] Permutation10()
+        private string GetThenBits(string password)
         {
-            var numbers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-            var aleatory = new Random();
-            return numbers.OrderBy(x => aleatory.Next()).ToArray();
-        }
-
-        private void GetFiveBitsKey(int[] tenBitKey)
-        {
-            for (var i = 0; i < 10; i++)
+            var bytes = "";
+            password = Permutate(password, permutationInitialKey);
+            foreach (char ch in password)
             {
-                if (i < 5)
-                    firstFive[i] = tenBitKey[i];
-                else
-                    lastfive[i - 5] = tenBitKey[i];
+                bytes += Convert.ToString((int)ch, 2);
+            }
+
+            if (bytes.Length < 10)
+            {
+                var complement = bytes;
+                for (int i = bytes.Length; i < 10; i++)
+                {
+                    complement += "0";
+                }
+                return complement;
+            }
+            else
+            {
+                return bytes.Substring(0, 10);
             }
         }
 
-        private void GetPermutation8()
+        private string GetFiveBitsKey(string tenBitKey, int firstOrSecond)
         {
-            var numbers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7};
-            var aleatory = new Random();
-            permutation8 = numbers.OrderBy(x => aleatory.Next()).ToArray();
+            return firstOrSecond == 1 ? tenBitKey.Substring(0, 5) : tenBitKey.Substring(4, 5);
         }
 
-        private string GetPermutationValue(int [] toPermutation)
+        private string LeftShift(string key)
         {
-            var result = new int[8];
-            for (var i = 0; i < 8; i++)
-            {
-                result[i] = toPermutation[permutation8[i]];
-            }
-            return GetRealKeyValues(result);
-        }
-
-        private string GetRealKeyValues(int[] orden)
-        {
-            var result = "";
-            for (var i = 0; i < 8; i++)
-            {
-                result += tenBitsKey[orden[i]];
-            }
-            return result;
-        }
-
-        private void Get10BitKey(string password)
-        {
-            var aleatroy = new Random();
-            var result = "";
-            foreach (char character in password)
-                result += Convert.ToString((int)character, 2);
-
-            for (int i = 0; i < 10; i++)
-            {
-                tenBitsKey[i] = Convert.ToInt32(result.ToCharArray()[aleatroy.Next(0, result.ToCharArray().Length-5)].ToString());
-            }
-        } 
-
-        private int[] LeftShift(int[] key)
-        {
-            int temporal = key[0];
+            var temporal = key[0].ToString();
+            var LS = "";
             for (int i = 0; i < 4; i++)
             {
-                key[i] = key[i + 1];
+                LS += key[i + 1].ToString();
             }
-            key[4] = temporal;
-            return key;
-        }
-
-        private int[] Merge()
-        {
-            var aleatroy = new Random();
-            int delete = aleatroy.Next(0, 4), j = 0;
-            int[] key = new int[8];
-            for (int i = 0; i < 5; i++)
-            {
-                if (i != delete)
-                {
-                    key[j] = firstFive[i];
-                    key[j++] = lastfive[i];
-                }
-            }
-            return key;
+            LS += temporal;
+            return LS;
         }
 
         //Encrypt area
         private int[] GetInitialPermutation()
         {
-            var numbers = new int[] { 0, 1, 2, 3, 4, 5, 6, 7 };
-            var aleatory = new Random();
-            return numbers.OrderBy(x => aleatory.Next()).ToArray();
-        }
-
-        private int[] GetPermuation4()
-        {
-            var numbers = new int[] { 0, 1, 2, 3 };
-            var aleatory = new Random();
-            return numbers.OrderBy(x => aleatory.Next()).ToArray();
+            return GetAPermutation(8);
         }
 
         private int[] GetExpandAndPermut()
@@ -174,20 +107,35 @@ namespace SDES_Algorithm
             return switchBox;
         }
 
+        /// <summary>
+        /// it assigns new tools for the encrypt
+        /// </summary>
+        /// <param name="originalFileName"></param>
+        /// <param name="nameOnFile"></param>
+        /// <param name="password"></param>
         public SDESMethods(string originalFileName, ref string nameOnFile, string password)
         {
             binaryAleatory = new Random();
-            GetKey(password);
+            Order = new Random();
             initialPermutation = GetInitialPermutation();
-            permutation4 = GetPermuation4();
+            permutation4 = GetAPermutation(4);
             expandAndPermut = GetExpandAndPermut();
             switchBox1 = GetSwitchBox();
             switchBox2 = GetSwitchBox();
+            permutation10 = GetAPermutation(10);
+            permutation8 = GetAPermutation(8);
+            permutationInitialKey = GetAPermutation(password.Length);
+            GetKeys(password);
 
             //this parth saves the important tools for after Decrypt.
             nameOnFile = SaveToolsForDecrypt(originalFileName);
         }
 
+        /// <summary>
+        /// this is only for decrypt, seachs in the file the tools.
+        /// </summary>
+        /// <param name="nameOnFile"></param>
+        /// <param name="password"></param>
         public SDESMethods(string nameOnFile, string password)
         {
             GetToolsForDecrypt(nameOnFile, password);
@@ -242,6 +190,21 @@ namespace SDES_Algorithm
             var x = Convert.ToInt32((coordinates[1].ToString() + coordinates[2].ToString()), 2);
             var y = Convert.ToInt32((coordinates[0].ToString() + coordinates[3].ToString()), 2);
             return switchBox[x, y];
+        }
+
+        /// <summary>
+        /// this method retuns aleatory permutations.
+        /// </summary>
+        /// <param name="HowMany"></param>
+        /// <returns></returns>
+        private int[] GetAPermutation(int HowMany)
+        {
+            int[] permutation = new int[HowMany];
+            for (int i = 0; i < HowMany; i++)
+            {
+                permutation[i] = i;
+            }
+            return permutation.OrderBy(x => Order.Next()).ToArray();
         }
 
         private string[] Encryption(string key, string[] result)
@@ -306,7 +269,7 @@ namespace SDES_Algorithm
         private string SaveToolsForDecrypt(string OriginalName)
         {
             var newName = OriginalName + "::" + FileController.GetNewCode();
-            FileController.DataToDecrypth(newName + "|" + ArrayValuesToString(initialPermutation) + "|" + ArrayValuesToString(expandAndPermut) + "|" + MatrixValuesToString(switchBox1) + "|" + MatrixValuesToString(switchBox2)+"|"+ArrayValuesToString(permutation10)+"|"+ArrayValuesToString(toPermut8K1)+"|"+ArrayValuesToString(toPermut8K2));
+            FileController.DataToDecrypth(newName + "|" + ArrayValuesToString(initialPermutation) + "|" + ArrayValuesToString(expandAndPermut) + "|" + MatrixValuesToString(switchBox1) + "|" + MatrixValuesToString(switchBox2)+"|"+ArrayValuesToString(permutation4)+"|"+ArrayValuesToString(permutation10)+"|"+ArrayValuesToString(permutation8)+"|"+ArrayValuesToString(permutationInitialKey));
             return newName;
         }
 
@@ -319,10 +282,11 @@ namespace SDES_Algorithm
                 expandAndPermut = StringToIntArray(data[2]);
                 switchBox1 = StringToStringMatrix(data[3]);
                 switchBox2 = StringToStringMatrix(data[4]);
-                permutation10 = StringToIntArray(data[5]);
-                toPermut8K1 = StringToIntArray(data[6]);
-                toPermut8K2 = StringToIntArray(data[7]);
-                GetKey(password);
+                permutation4 = StringToIntArray(data[5]);
+                permutation10 = StringToIntArray(data[6]);
+                permutation8 = StringToIntArray(data[7]);
+                permutationInitialKey = StringToIntArray(data[8]);
+                GetKeys(password);
                 return true;
             }catch(Exception e)
             {

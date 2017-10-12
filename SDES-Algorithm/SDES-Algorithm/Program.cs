@@ -10,68 +10,65 @@ namespace SDES_Algorithm
     {
         static void Main(string[] args)
         {
-            string name = "", nemeInFile = "";
-        
-            //for samples.
-            //FileController.Encrypted("Password","");
 
-            string[] entrada = Console.ReadLine().Split(' ');
-            int current = CaracterValido(0, entrada);
-
-
-            switch (entrada[current])
+            while (true)
             {
-                case "-c":
-                    Encrypt(entrada, current, name);
-                    break;
-                case "-d":
-                    Decrypt(entrada, current, name, nemeInFile);
-                    break;
-                case "--ayuda":
-                    Console.WriteLine("Encriptar -c <palabra clave>\nDesenciptar <palabra clave>-d\nRuta de archivo -f\nAyuda --ayuda");
-                    break;
-                default:
-                    Console.WriteLine("Comando no válido.\nEscriba --ayuda para obtener ayuda");
-                    break;
+                Console.WriteLine("SIMPLE DES Encryption");
+                Console.WriteLine("***Para encriptar se le pedirá una llave, para desencriptar se le solicitará la que usó, si no, le dará un resultado erróneo");
+                Console.WriteLine("\ningrese petición: ");
+                try
+                {
+                    string[] Instructions = Console.ReadLine().Trim().Split();
+
+
+                    switch (Instructions[0])
+                    {
+                        case "-c":
+                            var answer = "";
+                            do
+                            {
+                                Console.WriteLine("Ingrese una clave para la encripción (Es necesaria para desencryptar): ");
+                                answer = Console.ReadLine();
+                            } while (answer=="");
+                            FileController.Encrypted(answer, Path(Instructions));
+                            Console.WriteLine("ESTADO DE LA PETICIÓN: Terminada");
+                            break;
+                        case "-d":
+                            answer = "";
+                            do
+                            {
+                                Console.WriteLine("Ingrese la clave para la desencripción: ");
+                                answer = Console.ReadLine();
+                            } while (answer == "");
+                            FileController.Decrypted(answer, Path(Instructions));
+                            Console.WriteLine("ESTADO DE LA PETICIÓN: Terminada");
+                            break;
+                        case "--ayuda":
+                            Console.WriteLine("Encriptar -c <palabra clave>\nDesenciptar <palabra clave>-d\nRuta de archivo -f\nAyuda --ayuda");
+                            break;
+                        default:
+                            Console.WriteLine("Comando no válido.\nEscriba --ayuda para obtener ayuda");
+                            break;
+                    }
+                    Console.ReadKey();
+                    Console.Clear();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Sintaxis no válida\nEscriba --ayuda para obtener ayuda");
+                    Console.Clear();
+                }
             }
-            Console.ReadKey();
         }
 
-        static public int CaracterValido(int posicion, string[] entrada)
+        private static string Path(string[] InstructionArray)
         {
-            if (entrada[posicion] == "")
-                return CaracterValido(posicion + 1, entrada);
-            return posicion;
-        }
-
-        static public void Encrypt(string[] entrada, int current, string name)
-        {
-            string password;
-            var eightBits = "";
-            current = CaracterValido(current++, entrada);
-            password = entrada[current].Trim();
-            if (password == null)
-                Console.WriteLine("Sintaxis no válida\nEscriba --ayuda para obtener ayuda");
-            else
+            var path = "";
+            for (int i = 2; i < InstructionArray.Length; i++)
             {
-                SDESMethods Encryption = new SDESMethods("SDES", ref name, password);
-                //Encryption.Ciphertext(eightBits);
+                path += InstructionArray[i]+" ";
             }
-        }
-
-        static public void Decrypt(string[] entrada, int current, string name, string nameInFile)
-        {
-            string password;
-            var eightBits = "";
-            current = CaracterValido(current++, entrada);
-            password = entrada[current].Trim();
-            if(password == null)
-                Console.WriteLine("Sintaxis no válida\nEscriba --ayuda para obtener ayuda");
-            else
-            {
-                SDESMethods Encryption = new SDESMethods("SDES", ref name, password);
-                Encryption.Decrypted(eightBits);
-            }
+            return path.Trim();
         }
     }
 }
